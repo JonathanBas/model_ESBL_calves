@@ -1,6 +1,7 @@
 This code reproduces the following paper:
 
 **Drivers of ESBL-producing *Escherichia coli* dynamics in calves fattening farms, a modelling study**
+
 J. Bastard, M. Haenni, E. Gay, P. Glaser, J.Y. Madec, L. Temime, L. Opatowski
 
 * **data_preparation.R** imports and prepares the data of ESBL-EC carriage and antimicrobial use
