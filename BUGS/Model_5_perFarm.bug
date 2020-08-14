@@ -1,0 +1,68 @@
+model {
+
+	# INITIAL CARRIAGE
+	
+	for (indiv in init_pos){
+		portage_obs[indiv,1] <- 1
+	}
+	
+	for (indiv in init_neg){
+		portage_obs[indiv,1] <- ifelse(numb_farm == 1, 1, 0)
+	}
+	
+	# BETWEEN WEEKS 2 AND 55
+	
+	for (t in 2:55){
+		p_intro[t] <- mu * (p1[N_intro_plus1] == t) + mu * (p2[N_intro_plus1] == t)
+		
+		for (indiv in 1:N_calves){
+			prob_equal_1[indiv,t] <- ifelse(portage_obs[indiv,t-1] == 0,
+											1-exp(-(p_intro[t] + beta_f * sum(portage_obs[,t-1] * farm_bel[, farm_bel[indiv,4]]) / 15)),
+											exp(-(nu_0 * alpha_c_Pe^(max(0, 1 - last_expo_class[indiv, t, 1]*tau)) * alpha_c_Po^(max(0, 1 - last_expo_class[indiv, t, 2]*tau)) * alpha_c_T^(max(0, 1 - last_expo_class[indiv, t, 3]*tau)) * alpha_c_M^(max(0, 1 - last_expo_class[indiv, t, 4]*tau)) * alpha_c_ST^(max(0, 1 - last_expo_class[indiv, t, 5]*tau)))))
+			
+			portage_obs[indiv,t] ~ dbern(max(0.0001, prob_equal_1[indiv,t]))
+		}
+	}
+	
+	# BETWEEN WEEKS 56 and END (161)
+	
+	for (t in 56:t_end){
+		p_intro[t] <- mu * (p1[N_intro_plus1] == t) + mu * (p2[N_intro_plus1] == t)
+
+		for (indiv in from_56){
+			prob_equal_1[indiv,t] <- ifelse(portage_obs[indiv,t-1] == 0,
+											1-exp(-(p_intro[t] + beta_f * sum(portage_obs[from_56,t-1] * farm_bel[from_56, farm_bel[indiv,4]]) / sum(farm_bel[from_56, farm_bel[indiv,4]]))),
+											exp(-(nu_0 * alpha_c_Pe^(max(0, 1 - last_expo_class[indiv, t, 1]*tau)) * alpha_c_Po^(max(0, 1 - last_expo_class[indiv, t, 2]*tau)) * alpha_c_T^(max(0, 1 - last_expo_class[indiv, t, 3]*tau)) * alpha_c_M^(max(0, 1 - last_expo_class[indiv, t, 4]*tau)) * alpha_c_ST^(max(0, 1 - last_expo_class[indiv, t, 5]*tau)))))
+			
+			portage_obs[indiv,t] ~ dbern(max(0.0001, prob_equal_1[indiv,t]))
+		}
+	}
+	
+	# PRIORS
+	
+	nu_0 ~ dunif(0,10)
+
+	mu ~ dunif(0,10)
+	
+	for(i in 1:7){q[i] <- 0}
+	for(i in 8:t_end){q[i] <- 1/(t_end-7)}
+	for(i in 1:3){p[i] = 1/3}
+
+	N_intro_plus1 ~ dcat(p[])
+	
+	p1[1] <- 0
+	p1[2] ~ dcat(q[])
+	p1[3] ~ dcat(q[])
+	p2[1] <- 0
+	p2[2] <- 0
+	p2[3] ~ dcat(q[])
+	
+	beta_f ~ dunif(0,10)
+	
+	tau ~ dunif(0,1)
+	alpha_c_Pe ~ dunif(0,10)
+	alpha_c_Po ~ dunif(0,10)
+	alpha_c_T ~ dunif(0,10)
+	alpha_c_M ~ dunif(0,10)
+	alpha_c_ST ~ dunif(0,10)
+}

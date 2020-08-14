@@ -1,0 +1,54 @@
+model {
+
+	# INITIAL CARRIAGE
+	
+	for (indiv in init_pos){
+		portage_obs[indiv,1] <- 1
+	}
+	
+	for (indiv in init_neg){
+		portage_obs[indiv,1] <- 0
+	}
+	
+	# BETWEEN WEEKS 2 AND 55
+	
+	for (t in 2:55){
+		for (indiv in 1:N_calves){
+			prob_equal_1[indiv,t] <- ifelse(portage_obs[indiv,t-1] == 0,
+											1-exp(-(beta_0[farm_bel[indiv,4]])),
+											exp(-(nu_0 * alpha_c_Pe^(max(0, 1 - last_expo_class[indiv, t, 1]*tau)) * alpha_c_Po^(max(0, 1 - last_expo_class[indiv, t, 2]*tau)) * alpha_c_T^(max(0, 1 - last_expo_class[indiv, t, 3]*tau)) * alpha_c_M^(max(0, 1 - last_expo_class[indiv, t, 4]*tau)) * alpha_c_ST^(max(0, 1 - last_expo_class[indiv, t, 5]*tau)))))
+			
+			portage_obs[indiv,t] ~ dbern(prob_equal_1[indiv,t])
+		}
+	}
+	
+	# BETWEEN WEEKS 56 and END (161)
+	
+	for (t in 56:t_end){
+		for (indiv in from_56){
+			prob_equal_1[indiv,t] <- ifelse(portage_obs[indiv,t-1] == 0,
+											1-exp(-(beta_0[farm_bel[indiv,4]])),
+											exp(-(nu_0 * alpha_c_Pe^(max(0, 1 - last_expo_class[indiv, t, 1]*tau)) * alpha_c_Po^(max(0, 1 - last_expo_class[indiv, t, 2]*tau)) * alpha_c_T^(max(0, 1 - last_expo_class[indiv, t, 3]*tau)) * alpha_c_M^(max(0, 1 - last_expo_class[indiv, t, 4]*tau)) * alpha_c_ST^(max(0, 1 - last_expo_class[indiv, t, 5]*tau)))))
+			
+			portage_obs[indiv,t] ~ dbern(prob_equal_1[indiv,t])
+		}
+	}
+	
+	# PRIORS
+	
+	nu_0 ~ dunif(0,10)
+	
+	beta_0_f1 ~ dunif(0,10)
+	beta_0_f2 ~ dunif(0,10)
+	beta_0_f3 ~ dunif(0,10)
+	beta_0[1] <- beta_0_f1
+	beta_0[2] <- beta_0_f2
+	beta_0[3] <- beta_0_f3
+	
+	tau ~ dunif(0,1)
+	alpha_c_Pe ~ dunif(0,10)
+	alpha_c_Po ~ dunif(0,10)
+	alpha_c_T ~ dunif(0,10)
+	alpha_c_M ~ dunif(0,10)
+	alpha_c_ST ~ dunif(0,10)
+}
