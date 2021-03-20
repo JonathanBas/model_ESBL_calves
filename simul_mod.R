@@ -222,7 +222,7 @@ simul_mod_perFarm = function(mod, numb_farm, axis.title = T, nsimu=100, path="~/
   p = ggplot()
   
   if(plot_all_simu == F){
-    p = p + geom_ribbon(data = summa_prev, aes(x=day, ymin=inf, ymax=sup), alpha=0.5, fill="#E69F00")
+    p = p + geom_ribbon(data = summa_prev, aes(x=day, ymin=inf, ymax=sup), alpha=1, fill="lightgoldenrod3")
   }else{
     prev_all_simu = melt(colMeans(portage_all_simu[,,], dims=1, na.rm=T)*100)
     colnames(prev_all_simu) = c("time", "simu", "val")
@@ -237,13 +237,12 @@ simul_mod_perFarm = function(mod, numb_farm, axis.title = T, nsimu=100, path="~/
     p = p + geom_vline(xintercept = 49, linetype = "dotted")
   }
   p = p + geom_point(data = summa_prev, aes(y = obs, x=day), size = 3, shape = 23,  fill = "red", color = "black")
-  p = p + geom_point(data = summa_prev[! is.na(summa_prev$obs),], aes(y = -10, x=day), size = 3, shape = 4, color = "black")
   p = p + geom_rect(data = summa_prev, aes(xmin=day*Pe-0.5, xmax=day*Pe+0.5, ymin=105, ymax=107, fill="Penicillin"))
   p = p + geom_rect(data = summa_prev, aes(xmin=day*Po-0.5, xmax=day*Po+0.5, ymin=107, ymax=109, fill="Colistin"))
   p = p + geom_rect(data = summa_prev, aes(xmin=day*T-0.5, xmax=day*T+0.5, ymin=109, ymax=111, fill="Tetracycline"))
   p = p + geom_rect(data = summa_prev, aes(xmin=day*M-0.5, xmax=day*M+0.5, ymin=111, ymax=113, fill="Macrolide"))
   p = p + geom_rect(data = summa_prev, aes(xmin=day*ST-0.5, xmax=day*ST+0.5, ymin=113, ymax=115, fill="Sulfonamide-Trimethoprim"))
-  p = p + scale_y_continuous(breaks = seq(0,100,25), limits = c(-12,115))
+  p = p + scale_y_continuous(breaks = seq(0,100,25))
   p = p + scale_fill_manual(name = "Antibiotic class used:",
                             values = c("Penicillin" = "darkviolet", "Colistin" = "darkgreen", "Tetracycline" = "deepskyblue3", "Macrolide" = "darkorange", "Sulfonamide-Trimethoprim" = "brown3"))
   
@@ -417,7 +416,7 @@ simul_mod_allFarms = function(mod, axis.title = T, nsimu=100, path="~/Model_", p
   
   if(plot_all_simu == F){
     p = ggplot(data = summa_prev, aes(x=day))
-    p = p + geom_ribbon(aes(ymin=inf, ymax=sup), alpha=0.5, fill="#E69F00")
+    p = p + geom_ribbon(aes(ymin=inf, ymax=sup), alpha=1, fill="lightgoldenrod3")
   }else{
     prev_all_simu = rbind(melt(colMeans(portage_all_simu[1:15,,], dims=1, na.rm=T)*100),
                           melt(colMeans(portage_all_simu[16:30,,], dims=1, na.rm=T)*100),
@@ -437,13 +436,12 @@ simul_mod_allFarms = function(mod, axis.title = T, nsimu=100, path="~/Model_", p
     p = p + geom_vline(xintercept = 49, linetype = "dotted")
   }
   p = p + geom_point(data = summa_prev, aes(y = obs, x=day), size = 3, shape = 23,  fill = "red", color = "black")
-  p = p + geom_point(data = summa_prev[! is.na(summa_prev$obs),], aes(y = -10, x=day), size = 3, shape = 4, color = "black")
   p = p + geom_rect(data = summa_prev, aes(xmin=day*Pe-0.5, xmax=day*Pe+0.5, ymin=105, ymax=107, fill="Penicillin"))
   p = p + geom_rect(data = summa_prev, aes(xmin=day*Po-0.5, xmax=day*Po+0.5, ymin=107, ymax=109, fill="Colistin"))
   p = p + geom_rect(data = summa_prev, aes(xmin=day*T-0.5, xmax=day*T+0.5, ymin=109, ymax=111, fill="Tetracycline"))
   p = p + geom_rect(data = summa_prev, aes(xmin=day*M-0.5, xmax=day*M+0.5, ymin=111, ymax=113, fill="Macrolide"))
   p = p + geom_rect(data = summa_prev, aes(xmin=day*ST-0.5, xmax=day*ST+0.5, ymin=113, ymax=115, fill="Sulfonamide-Trimethoprim"))
-  p = p + scale_y_continuous(breaks = seq(0,100,25), limits = c(-12,115))
+  p = p + scale_y_continuous(breaks = seq(0,100,25))
   p = p + scale_fill_manual(name = "Antibiotic class used:",
                             values = c("Penicillin" = "darkviolet", "Colistin" = "darkgreen", "Tetracycline" = "deepskyblue3", "Macrolide" = "darkorange", "Sulfonamide-Trimethoprim" = "brown3"))
   
@@ -462,18 +460,19 @@ simul_mod_allFarms = function(mod, axis.title = T, nsimu=100, path="~/Model_", p
   p
   
   if(save_fig){
+    write.table(x = summa_prev, file = paste0("~/Table simulations model", mod," all farms.csv"), sep=";")
     ggsave(p, file = paste0("~/Figure simulations model", mod," all farms.pdf"), width=8, height=5)
   }
   
   return(list(portage_all_simu, p, summa_prev))
 }
 
-fig5 = simul_mod_allFarms(mod = 5, nsimu=1000, last_expo_class = last_expo_class, save_fig = T)
+fig5 = simul_mod_allFarms(mod = 5, nsimu=5000, last_expo_class = last_expo_class, save_fig = T)
 
 library(ggpubr)
-p1 = simul_mod_perFarm(5, 1, nsimu=1000, for_save=T, last_expo_class=last_expo_class)[[2]]
-p2 = simul_mod_perFarm(5, 2, nsimu=1000, for_save=T, last_expo_class=last_expo_class)[[2]]
-p3 = simul_mod_perFarm(5, 3, nsimu=1000, for_save=T, last_expo_class=last_expo_class)[[2]]
+p1 = simul_mod_perFarm(5, 1, nsimu=5000, for_save=T, last_expo_class=last_expo_class)[[2]]
+p2 = simul_mod_perFarm(5, 2, nsimu=5000, for_save=T, last_expo_class=last_expo_class)[[2]]
+p3 = simul_mod_perFarm(5, 3, nsimu=5000, for_save=T, last_expo_class=last_expo_class)[[2]]
 com_leg = get_legend(simul_mod_perFarm(5, 1, nsimu=3, last_expo_class=last_expo_class)[[2]])
 
 p_main = ggarrange(p1, p2, p3, com_leg, nrow = 2, ncol = 2, labels = c("Farm A", "Farm B", "Farm C"), label.x = 0.65, label.y = 0.98)
