@@ -1,6 +1,6 @@
 This code reproduces the following paper:
 
-**Drivers of ESBL-producing *Escherichia coli* dynamics in calves fattening farms, a modelling study**
+**Drivers of ESBL-producing *Escherichia coli* dynamics in calf fattening farms: A modelling study**
 
 J. Bastard, M. Haenni, E. Gay, P. Glaser, J.Y. Madec, L. Temime, L. Opatowski
 
